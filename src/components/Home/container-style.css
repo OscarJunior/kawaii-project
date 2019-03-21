@@ -1,0 +1,7 @@
+.container-parent {
+  display: flex;
+}
+
+.container-son {
+  flex-basis: 50%;
+}
