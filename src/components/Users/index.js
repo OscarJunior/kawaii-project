@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { List, Form, Icon, Input, Button } from "antd";
+import { List, Form, Icon, Input, Button, Spin, notification } from "antd";
+import {Ghost} from "react-kawaii";
 
 import ExpandedItem from "./Expanded";
 
@@ -9,6 +10,7 @@ class Home extends Component {
     super();
 
     this.state = {
+      isLoading : false,
       myRepos: []
     };
 
@@ -23,27 +25,46 @@ class Home extends Component {
 
     validateFields((err, values) => {
       if (!err) {
+        this.setState({isLoading: true})
         axios
           .get(`https://api.github.com/users/${values.user}/repos`, {
             headers: {
               Accept: "application/vnd.github.nightshade-preview+json"
             }
           })
-          .then(({ data }) =>
+          .then(({ data }) => {
             this.setState({
-              myRepos: data
+              myRepos: data,
+              isLoading: false
             })
-          );
+            this.openNotification("Download Complete","Los reporsitorios han sido cargados")
+          })
+          .catch(err =>{
+            console.log(err)
+            this.setState({
+              isLoading: false
+            })
+            this.openNotification("Error has ocurred","Error has ocurred try again")
+          })
       }
     });
   }
 
+  openNotification = (tittle, description) => {
+    notification.open({
+      message: `${tittle}`,
+      description: `${description}`,
+      onClick: () => {
+        console.log('Notification Clicked!');
+      },
+    });
+  };
+
   render() {
-    const { myRepos } = this.state;
+    const { myRepos, isLoading } = this.state;
     const { form } = this.props;
 
     const { getFieldDecorator } = form;
-
     return (
       <div className="App">
         <h1>Calling to GitHub API</h1>
@@ -70,15 +91,17 @@ class Home extends Component {
           </Form.Item>
         </Form>
 
-        <List
-          bordered
-          dataSource={myRepos}
-          renderItem={item => (
-            <List.Item>
-              <ExpandedItem itemData={item} />
-            </List.Item>
-          )}
-        />
+        {isLoading ? <div><Spin /> <Ghost size={240} mood="blissful" color="#E0E4E8" /></div> : 
+          <List
+            bordered
+            dataSource={myRepos}
+            renderItem={item => (
+              <List.Item>
+                <ExpandedItem itemData={item} message={this.openNotification}/>
+              </List.Item>
+            )}
+          />
+        }
       </div>
     );
   }

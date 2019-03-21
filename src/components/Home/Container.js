@@ -11,50 +11,71 @@ import {
 
 import "./container-style.css";
 
+const happyKawaisPosition = {
+  myKawaiiInLeft: [
+    isLeft => (
+      <Cat size={320} mood={isLeft ? "excited" : "sad"} color="#596881" />
+    ),
+    isLeft => (
+      <File size={200} mood={isLeft ? "excited" : "sad"} color="#83D1FB" />
+    ),
+    isLeft => (
+      <IceCream
+        size={300}
+        mood={isLeft ? "excited" : "sad"}
+        color="#FDA7DC"
+      />
+    ),
+    isLeft => (
+      <Planet
+        size={220}
+        mood={isLeft ? "excited" : "sad"}
+        color="#FCCB7E"
+      />
+    )
+  ],
+  myKawaiiInRight: [
+    isLeft => (
+      <Browser
+        size={200}
+        mood={isLeft ? "sad" : "excited"}
+        color="#61DDBC"
+      />
+    ),
+    isLeft => (
+      <CreditCard
+        size={200}
+        mood={isLeft ? "sad" : "excited"}
+        color="#83D1FB"
+      />
+    )
+  ]
+}
+
 class Container extends Component {
   constructor() {
     super();
 
-    this.state = {
-      myKawaiiInLeft: [
-        isLeft => (
-          <Cat size={320} mood={isLeft ? "excited" : "sad"} color="#596881" />
-        ),
-        isLeft => (
-          <File size={200} mood={isLeft ? "excited" : "sad"} color="#83D1FB" />
-        ),
-        isLeft => (
-          <IceCream
-            size={300}
-            mood={isLeft ? "excited" : "sad"}
-            color="#FDA7DC"
-          />
-        ),
-        isLeft => (
-          <Planet
-            size={220}
-            mood={isLeft ? "excited" : "sad"}
-            color="#FCCB7E"
-          />
-        )
-      ],
-      myKawaiiInRight: [
-        isLeft => (
-          <Browser
-            size={200}
-            mood={isLeft ? "sad" : "excited"}
-            color="#61DDBC"
-          />
-        ),
-        isLeft => (
-          <CreditCard
-            size={200}
-            mood={isLeft ? "sad" : "excited"}
-            color="#83D1FB"
-          />
-        )
-      ]
-    };
+    this.state = happyKawaisPosition
+
+    this.handlerChange = this.handlerChange.bind(this);
+  }
+
+  handlerChange = (e) =>{
+    this.setState(happyKawaisPosition)
+  }
+
+  componentDidMount = () =>{
+    let storage = window.localStorage.getItem('myState')
+    if(storage) {
+      //console.log(storage)
+      //this.setState(JSON.parse(storage))
+    }
+     
+  }
+
+  componentWillUnmount = () =>{
+    //window.localStorage.setItem('myState', JSON.stringify(this.state))
   }
 
   render() {
@@ -62,7 +83,7 @@ class Container extends Component {
 
     return (
       <div>
-        <Switch disabled={true} />
+        <Switch onChange={this.handlerChange} />
         <h2>Make kawaiis happy</h2>
 
         <div className="container-parent">
