@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Switch } from "antd";
+import { Switch, Button } from "antd";
 import {
   Browser,
   Cat,
@@ -14,7 +14,6 @@ import "./container-style.css";
 class Container extends Component {
   constructor() {
     super();
-
     this.state = {
       myKawaiiInLeft: [
         isLeft => (
@@ -55,15 +54,56 @@ class Container extends Component {
         )
       ]
     };
+
+    if(window.localStorage["storedKawaiisInLeft"]) {
+      this.state = {
+        myKawaiiInLeft: eval('([' + window.localStorage["storedKawaiisInLeft"] + '])'),
+        myKawaiiInRight: eval('([' + window.localStorage["storedKawaiisInRight"] + '])')
+      }
+    }
+
+    this.resetHandler = this.resetHandler.bind(this);
+    this.saveLocalStorage = this.saveLocalStorage.bind(this);
+  }
+
+  saveLocalStorage() {
+      window.localStorage.setItem("storedKawaiisInLeft", this.state.myKawaiiInLeft);
+      window.localStorage.setItem("storedKawaiisInRight", this.state.myKawaiiInRight);
+  }
+
+  cleanLocalStorage() {
+    window.localStorage.clear();
+  }
+
+  resetHandler() {
+    let shouldGoAtLeft = [];
+    let shouldGoAtRight = [];
+
+    for (let kawaii of this.state.myKawaiiInLeft) {
+      kawaii(true).props.mood === "sad" ? shouldGoAtRight.push(kawaii) : shouldGoAtLeft.push(kawaii);
+    }
+    
+    for (let kawaii of this.state.myKawaiiInRight) {
+      kawaii().props.mood === "sad" ? shouldGoAtLeft.push(kawaii) : shouldGoAtRight.push(kawaii);
+    }
+
+    this.setState({
+      myKawaiiInLeft: shouldGoAtLeft,
+      myKawaiiInRight: shouldGoAtRight
+    });
   }
 
   render() {
     const { myKawaiiInLeft, myKawaiiInRight } = this.state;
 
+    this.saveLocalStorage();
+
     return (
       <div>
-        <Switch disabled={true} />
+        <Switch onChange={this.resetHandler} />
         <h2>Make kawaiis happy</h2>
+
+        <Button type="primary" onClick={this.cleanLocalStorage}>Clean localStorage</Button>
 
         <div className="container-parent">
           <div
@@ -83,7 +123,9 @@ class Container extends Component {
                 });
               }
             }}
-            onDragOver={e => e.preventDefault()}
+            onDragOver={e => {
+              e.preventDefault()
+            }}
           >
             {myKawaiiInLeft.map((kawaii, i) => (
               <div
