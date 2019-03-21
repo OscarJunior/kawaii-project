@@ -55,6 +55,19 @@ class Container extends Component {
         )
       ]
     };
+
+    this.handleChange = this.handleChange.bind(this);
+
+  }
+
+  handleChange(e) { //Cambia los objetos de columna
+
+    e.preventDefault();
+    var kawaiiLeft = this.state.myKawaiiInLeft; //Almacena el estado de la columna izquierda
+    var kawaiiRigth = this.state.myKawaiiInRight; //Almacena el estado de la columna derecha
+
+    this.setState({myKawaiiInLeft: kawaiiRigth});
+    this.setState({myKawaiiInRight: kawaiiLeft});
   }
 
   render() {
@@ -62,7 +75,7 @@ class Container extends Component {
 
     return (
       <div>
-        <Switch disabled={true} />
+        <Switch onChange={this.handleChange} />
         <h2>Make kawaiis happy</h2>
 
         <div className="container-parent">
