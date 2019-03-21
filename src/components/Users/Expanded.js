@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from 'axios';
-import { Icon, Empty, List } from "antd";
+import { Icon, Spin, List } from "antd";
+import { Planet } from 'react-kawaii';
 
 import "./expanded-style.css";
 
@@ -10,7 +11,7 @@ class ExpandedItem extends Component {
 
     this.state = {
       isExpanded: false,
-      content: (<Empty/>)
+      content: (<div><Planet mood="shocked" size={50} color="#72CEFF" className="loading-kawaii"/></div>),
     };
 
     this.fetchProjectCommits = this.fetchProjectCommits.bind(this);
@@ -31,7 +32,7 @@ class ExpandedItem extends Component {
       })
       .then(mapedCommits => {
         this.setState({
-          content: mapedCommits
+          content: mapedCommits,
         })
       })
   }
@@ -42,18 +43,19 @@ class ExpandedItem extends Component {
 
     const { name } = itemData;
 
-    this.fetchProjectCommits();
-
     return (
       <div className="container-expanded-item">
         <div className="align-center-in-item">
           <span>{name}</span>
           <Icon
             type={`${isExpanded ? "up" : "down"}-circle`}
-            onClick={() =>
-              this.setState({
-                isExpanded: !isExpanded
-              })
+            onClick={() => {
+                this.setState({
+                  isExpanded: !isExpanded,
+                  isLoading: true
+                })
+                this.fetchProjectCommits();
+              }
             }
           />
         </div>
