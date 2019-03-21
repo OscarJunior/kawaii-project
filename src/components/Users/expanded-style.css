@@ -1,0 +1,8 @@
+.container-expanded-item div {
+  text-align: left;
+}
+
+.container-expanded-item .align-center-in-item {
+  display: flex;
+  align-items: center;
+}
