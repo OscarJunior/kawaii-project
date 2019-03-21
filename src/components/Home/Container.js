@@ -62,7 +62,6 @@ class Container extends Component {
 
   handleChange(e) { //Cambia los objetos de columna
 
-    e.preventDefault();
     var kawaiiLeft = this.state.myKawaiiInLeft; //Almacena el estado de la columna izquierda
     var kawaiiRigth = this.state.myKawaiiInRight; //Almacena el estado de la columna derecha
 
@@ -104,7 +103,7 @@ class Container extends Component {
                 onDragStart={e => e.dataTransfer.setData("positionInLeft", i)}
                 key={i}
               >
-                {kawaii(true)}
+                {1}
               </div>
             ))}
           </div>
