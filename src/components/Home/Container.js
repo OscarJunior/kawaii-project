@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Switch, Button } from "antd";
+import { Switch, Button, notification } from "antd";
 import {
   Browser,
   Cat,
@@ -10,6 +10,13 @@ import {
 } from "react-kawaii";
 
 import "./container-style.css";
+
+const openNotification = (type, msg, description) => {
+  notification[type]({
+    message: msg,
+    description: description,
+  });
+};
 
 class Container extends Component {
   constructor() {
@@ -121,10 +128,11 @@ class Container extends Component {
                     (kawaii, i) => i !== Number(positionInRight)
                   )
                 });
+                openNotification('success', 'Kawaii has been moved', 'The kawaii has been moved to the opposite side');
               }
             }}
             onDragOver={e => {
-              e.preventDefault()
+              e.preventDefault();
             }}
           >
             {myKawaiiInLeft.map((kawaii, i) => (
@@ -152,9 +160,13 @@ class Container extends Component {
                     (kawaii, i) => i !== Number(positionInLeft)
                   )
                 });
+                openNotification('success', 'Kawaii has been moved', 'The kawaii has been moved to the opposite side');
               }
             }}
-            onDragOver={e => e.preventDefault()}
+            onDragOver={e => {
+                e.preventDefault()
+              }
+            }
           >
             {myKawaiiInRight.map((kawaii, i) => (
               <div

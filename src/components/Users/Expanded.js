@@ -1,9 +1,16 @@
 import React, { Component } from "react";
 import axios from 'axios';
-import { Icon, Spin, List } from "antd";
+import { Icon, notification, List } from "antd";
 import { Planet } from 'react-kawaii';
 
 import "./expanded-style.css";
+
+const openNotification = (type, msg, description) => {
+  notification[type]({
+    message: msg,
+    description: description,
+  });
+};
 
 class ExpandedItem extends Component {
   constructor() {
@@ -34,6 +41,9 @@ class ExpandedItem extends Component {
         this.setState({
           content: mapedCommits,
         })
+      })
+      .catch(error => {
+        openNotification('error', 'Error!', 'There was a problem fetching the required data from the github servers')
       })
   }
 
