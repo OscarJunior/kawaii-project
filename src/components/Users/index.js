@@ -1,9 +1,13 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { List, Form, Icon, Input, Button } from "antd";
+import { List, Form, Icon, Input, Button, Empty, ConfigProvider } from "antd";
 import { SpeechBubble } from 'react-kawaii';
 
 import ExpandedItem from "./Expanded";
+
+const config = () => (
+  <Empty image={<SpeechBubble mood="sad" size={100}/>} />
+);
 
 class Home extends Component {
   constructor() {
@@ -79,15 +83,17 @@ class Home extends Component {
           </Form.Item>
         </Form>
 
-        <List
-          bordered
-          dataSource={myRepos}
-          renderItem={item => (
-            <List.Item>
-              <ExpandedItem itemData={item} />
-            </List.Item>
-          )}
-        />
+        <ConfigProvider renderEmpty={config}>
+          <List
+            bordered
+            dataSource={myRepos}
+            renderItem={item => (
+              <List.Item>
+                <ExpandedItem itemData={item} />
+              </List.Item>
+            )}
+          />
+        </ConfigProvider>
       </div>
     );
   }
