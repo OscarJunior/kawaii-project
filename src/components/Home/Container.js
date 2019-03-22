@@ -80,23 +80,41 @@ class Container extends Component {
         )
       ]
     };
-
+    
     if(storage.getKawaiisInLeft()) {
+      let kawaiisInLeft = [];
+      let kawaiisInRight = [];
+
+      for (let refId of JSON.parse(storage.getKawaiisInLeft())) {
+        kawaiisInLeft.push(kawaiiReference.get(refId));
+      }
+      for (let refId of JSON.parse(storage.getKawaiisInRight())) {
+        kawaiisInRight.push(kawaiiReference.get(refId));
+      }
       this.state = {
-        myKawaiiInLeft: eval('([' + storage.getKawaiisInLeft() + '])'),
-        myKawaiiInRight: eval('([' + storage.getKawaiisInRight() + '])')
+        myKawaiiInLeft: kawaiisInLeft,
+        myKawaiiInRight: kawaiisInRight
       }
     }
 
     this.resetHandler = this.resetHandler.bind(this);
     this.saveLocalStorage = this.saveLocalStorage.bind(this);
-    this.saveKawaiis = this.saveKawaiis.bind(this);
+    this.saveKawaiisToDB = this.saveKawaiisToDB.bind(this);
     this.loadKawaiisFromDB = this.loadKawaiisFromDB.bind(this);
 
   }
 
-  saveLocalStorage() {
-    storage.setKawaiisBothSides(this.state.myKawaiiInLeft, this.state.myKawaiiInRight);
+  saveLocalStorage() { 
+    let kawaiisInLeft = [];
+    let kawaiisInRight = [];
+
+    for (let kawaii of this.state.myKawaiiInLeft) {
+      kawaiisInLeft.push(kawaii().props.refString);
+    }
+    for (let kawaii of this.state.myKawaiiInRight) {
+      kawaiisInRight.push(kawaii().props.refString);
+    }
+    storage.setKawaiisBothSides(JSON.stringify(kawaiisInLeft), JSON.stringify(kawaiisInRight));
   }
 
   resetHandler() {
@@ -146,7 +164,7 @@ class Container extends Component {
     })
   }
 
-  saveKawaiis() {
+  saveKawaiisToDB() {
     if (storage.getUserId() && storage.getAccessToken()) {
       let kawaiisInLeft = [];
       let kawaiisInRight = [];
@@ -199,7 +217,7 @@ class Container extends Component {
         <Switch onChange={this.resetHandler} />
         <h2>Make kawaiis happy</h2>
 
-        <Button type="primary" onClick={this.saveKawaiis}>Save to DB</Button>
+        <Button type="primary" onClick={this.saveKawaiisToDB}>Save to DB</Button>
         <Button type="primary" onClick={this.loadKawaiisFromDB}>Load from DB</Button>
         <Button type="danger" onClick={() => {storage.deleteStoredKawaiis()}}>Delete Local Stored Kawaiis</Button>
 

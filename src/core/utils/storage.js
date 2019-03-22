@@ -21,11 +21,11 @@ export default {
     },
 
     getKawaiisInLeft() {
-        return window.localStorage.getItem('stored-kawaiis-in-left');
+        return window.localStorage.getItem('stored-kawaiis-in-left') || false;
     },
 
     getKawaiisInRight() {
-        return window.localStorage.getItem('stored-kawaiis-in-right');
+        return window.localStorage.getItem('stored-kawaiis-in-right') || false;
     },
 
     setKawaiisInLeft(kawaiis) {
