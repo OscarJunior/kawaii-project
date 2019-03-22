@@ -5,3 +5,7 @@
 .container-son {
   flex-basis: 50%;
 }
+
+button {
+  margin: 1rem;
+}

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { List, Form, Icon, Input, Button, Empty, ConfigProvider } from "antd";
+import { List, Form, Icon, Input, Button, Empty, ConfigProvider, notification } from "antd";
 import { File } from 'react-kawaii';
 
 import ExpandedItem from "./Expanded";
@@ -8,6 +8,13 @@ import ExpandedItem from "./Expanded";
 const customEmpty = () => (
   <Empty image={<File mood="sad" size={100}/>} />
 );
+
+const openNotification = (type, msg, description) => {
+  notification[type]({
+    message: msg,
+    description: description,
+  });
+};
 
 class Home extends Component {
   constructor() {
@@ -38,7 +45,9 @@ class Home extends Component {
             this.setState({
               myRepos: data
             })
-          );
+          ).catch(error => {
+            openNotification('error', 'Error!', 'There was a problem fetching the required data from the github servers')
+          });
       }
     });
   }

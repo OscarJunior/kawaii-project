@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+
 import { Switch, Button, notification } from "antd";
 import {
   Browser,
@@ -10,6 +11,10 @@ import {
 } from "react-kawaii";
 
 import "./container-style.css";
+
+import axios from "axios";
+import storage from '../../core/utils/storage';
+import kawaiiReference from '../../core/utils/kawaiiReference';
 
 const openNotification = (type, msg, description) => {
   notification[type]({
@@ -24,16 +29,27 @@ class Container extends Component {
     this.state = {
       myKawaiiInLeft: [
         isLeft => (
-          <Cat size={320} mood={isLeft ? "excited" : "sad"} color="#596881" />
+          <Cat
+            size={320}
+            mood={isLeft ? "excited" : "sad"}
+            color="#596881"
+            refString="catLeft"
+          />
         ),
         isLeft => (
-          <File size={200} mood={isLeft ? "excited" : "sad"} color="#83D1FB" />
+          <File
+            size={200}
+            mood={isLeft ? "excited" : "sad"}
+            color="#83D1FB"
+            refString="fileLeft"
+          />
         ),
         isLeft => (
           <IceCream
             size={300}
             mood={isLeft ? "excited" : "sad"}
             color="#FDA7DC"
+            refString="iceCreamLeft"
           />
         ),
         isLeft => (
@@ -41,6 +57,7 @@ class Container extends Component {
             size={220}
             mood={isLeft ? "excited" : "sad"}
             color="#FCCB7E"
+            refString="planetLeft"
           />
         )
       ],
@@ -50,6 +67,7 @@ class Container extends Component {
             size={200}
             mood={isLeft ? "sad" : "excited"}
             color="#61DDBC"
+            refString="browserRight"
           />
         ),
         isLeft => (
@@ -57,29 +75,28 @@ class Container extends Component {
             size={200}
             mood={isLeft ? "sad" : "excited"}
             color="#83D1FB"
+            refString="creditCardRight"
           />
         )
       ]
     };
 
-    if(window.localStorage["storedKawaiisInLeft"]) {
+    if(storage.getKawaiisInLeft()) {
       this.state = {
-        myKawaiiInLeft: eval('([' + window.localStorage["storedKawaiisInLeft"] + '])'),
-        myKawaiiInRight: eval('([' + window.localStorage["storedKawaiisInRight"] + '])')
+        myKawaiiInLeft: eval('([' + storage.getKawaiisInLeft() + '])'),
+        myKawaiiInRight: eval('([' + storage.getKawaiisInRight() + '])')
       }
     }
 
     this.resetHandler = this.resetHandler.bind(this);
     this.saveLocalStorage = this.saveLocalStorage.bind(this);
+    this.saveKawaiis = this.saveKawaiis.bind(this);
+    this.loadKawaiisFromDB = this.loadKawaiisFromDB.bind(this);
+
   }
 
   saveLocalStorage() {
-      window.localStorage.setItem("storedKawaiisInLeft", this.state.myKawaiiInLeft);
-      window.localStorage.setItem("storedKawaiisInRight", this.state.myKawaiiInRight);
-  }
-
-  cleanLocalStorage() {
-    window.localStorage.clear();
+    storage.setKawaiisBothSides(this.state.myKawaiiInLeft, this.state.myKawaiiInRight);
   }
 
   resetHandler() {
@@ -100,6 +117,78 @@ class Container extends Component {
     });
   }
 
+  loadKawaiisFromDB() {
+    let leftKawaiis = [];
+    let rightKawaiis = [];
+    axios.get(`http://localhost:8080/v1/cols/${storage.getUserId()}`, {
+      headers: {
+        Authorization: `Bearer ${storage.getAccessToken()}`
+      }
+    })
+    .then(res => {
+      for (let column of res.data){
+        if (column.position === "LEFT") {
+          for(let kawaiiRef of column.kawaiisList){
+            leftKawaiis.push(kawaiiReference.get(kawaiiRef));
+          }
+        } else {
+          for (let kawaiiRef of column.kawaiisList) {
+            rightKawaiis.push(kawaiiReference.get(kawaiiRef));
+          }
+        }
+      }
+    })
+    .then(() => {
+      this.setState({
+        myKawaiiInLeft: leftKawaiis,
+        myKawaiiInRight: rightKawaiis
+      })
+    })
+  }
+
+  saveKawaiis() {
+    if (storage.getUserId() && storage.getAccessToken()) {
+      let kawaiisInLeft = [];
+      let kawaiisInRight = [];
+
+      for (let kawaii of this.state.myKawaiiInLeft) {
+        kawaiisInLeft.push(kawaii(true).props.refString);
+      }
+      for (let kawaii of this.state.myKawaiiInRight) {
+        kawaiisInRight.push(kawaii().props.refString);
+      }
+
+      axios.all([
+        axios
+          .put(`http://localhost:8080/v1/cols/${storage.getUserId()}`, {
+            position: "LEFT",
+            kawaiisList: kawaiisInLeft,
+          }, {
+            headers: {
+              Authorization: `Bearer ${storage.getAccessToken()}`
+            }
+          }),
+        axios
+          .put(`http://localhost:8080/v1/cols/${storage.getUserId()}`, {
+            position: "RIGHT",
+            kawaiisList: kawaiisInRight,
+          }, {
+            headers: {
+              Authorization: `Bearer ${storage.getAccessToken()}`
+            }
+          })
+      ])
+      .then(axios.spread((left, right) => {
+        if (left.status === 200 && right.status === 200) {
+          openNotification('success', 'Kawaiis Saved', 'Kawaiis successfully stored in database');
+        }
+      }))
+        
+    } else {
+      openNotification("error", "Login First", "You need to be authenticated to use this feature");
+    }
+  }
+
   render() {
     const { myKawaiiInLeft, myKawaiiInRight } = this.state;
 
@@ -110,7 +199,9 @@ class Container extends Component {
         <Switch onChange={this.resetHandler} />
         <h2>Make kawaiis happy</h2>
 
-        <Button type="primary" onClick={this.cleanLocalStorage}>Clean localStorage</Button>
+        <Button type="primary" onClick={this.saveKawaiis}>Save to DB</Button>
+        <Button type="primary" onClick={this.loadKawaiisFromDB}>Load from DB</Button>
+        <Button type="danger" onClick={() => {storage.deleteStoredKawaiis()}}>Delete Local Stored Kawaiis</Button>
 
         <div className="container-parent">
           <div

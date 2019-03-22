@@ -5,6 +5,7 @@ import { withRouter } from "react-router";
 import Home from "./components/Home";
 import Users from "./components/Users";
 import OhNo from "./components/OhNo";
+import LoginForm from "./components/LoginForm/LoginForm";
 
 class AppRouter extends Component {
   componentDidCatch() {
@@ -19,6 +20,7 @@ class AppRouter extends Component {
         <Route path="/" exact component={Home} />
         <Route path="/users" component={Users} />
         <Route path="/oh-no" component={OhNo} />
+        <Route path="/login" component={LoginForm} />
       </div>
     );
   }

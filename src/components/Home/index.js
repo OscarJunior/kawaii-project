@@ -7,7 +7,6 @@ class Home extends Component {
     return (
       <div>
         <h1>This is my kawaii project</h1>
-
         <Container />
       </div>
     );
