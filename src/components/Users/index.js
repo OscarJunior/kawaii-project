@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { List, Form, Icon, Input, Button } from "antd";
+import { SpeechBubble } from 'react-kawaii';
 
 import ExpandedItem from "./Expanded";
 
@@ -36,6 +37,14 @@ class Home extends Component {
           );
       }
     });
+  }
+
+  loading() {
+    var isLoading = true;
+
+    if(isLoading) {
+      return (<SpeechBubble size={220} mood="happy" color="#83D1FB" />);
+    }
   }
 
   render() {

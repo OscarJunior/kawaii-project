@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Switch } from "antd";
+import { Switch, Button } from "antd";
 import {
   Browser,
   Cat,
@@ -56,26 +56,50 @@ class Container extends Component {
       ]
     };
 
-    this.handleChange = this.handleChange.bind(this);
+    if(window.localStorage["myKawaiiLeft"]) {
+      this.state = {
+        myKawaiiInLeft: eval('([' + window.localStorage["myKawaiiLeft"] + '])'),
+        myKawaiiInRight: eval('([' + window.localStorage["myKawaiiRight"] + '])')
+      }
+    }
+
+    this.reset = this.reset.bind(this);
+    this.saveStorage = this.saveStorage.bind(this);
 
   }
 
-  handleChange(e) { //Cambia los objetos de columna
+  reset = () => { //Cambia los objetos de columna
 
     var kawaiiLeft = this.state.myKawaiiInLeft; //Almacena el estado de la columna izquierda
     var kawaiiRigth = this.state.myKawaiiInRight; //Almacena el estado de la columna derecha
 
-    this.setState({myKawaiiInLeft: kawaiiRigth});
-    this.setState({myKawaiiInRight: kawaiiLeft});
+    this.setState({
+      myKawaiiInLeft: kawaiiRigth,
+      myKawaiiInRight: kawaiiLeft
+    });
+
+  }
+
+  saveStorage = () => {
+    window.localStorage.setItem("myKawaiiLeft", this.state.myKawaiiInLeft);
+    window.localStorage.setItem("myKawaiiRight", this.state.myKawaiiInRight);
+  }
+
+  cleanStorage = () => {
+    window.localStorage.clear();
   }
 
   render() {
     const { myKawaiiInLeft, myKawaiiInRight } = this.state;
 
+    this.saveStorage();
+
     return (
       <div>
-        <Switch onChange={this.handleChange} />
+        <Switch onChange={this.reset} />
         <h2>Make kawaiis happy</h2>
+
+        <Button type="primary" onClick={this.cleanStorage}>Limpiar el Storage</Button>
 
         <div className="container-parent">
           <div
@@ -103,7 +127,7 @@ class Container extends Component {
                 onDragStart={e => e.dataTransfer.setData("positionInLeft", i)}
                 key={i}
               >
-                {1}
+                {kawaii(true)}
               </div>
             ))}
           </div>
