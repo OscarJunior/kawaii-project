@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { Breadcrumb } from "antd";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { List, Form, Icon, Input, Button, Spin, notification } from "antd";
 import {Ghost} from "react-kawaii";
@@ -44,7 +46,7 @@ class Home extends Component {
             this.setState({
               isLoading: false
             })
-            this.openNotification("Error has ocurred","Error has ocurred try again")
+            this.openNotification("Error has ocurred","User not found")
           })
       }
     });
@@ -67,6 +69,14 @@ class Home extends Component {
     const { getFieldDecorator } = form;
     return (
       <div className="App">
+        <Breadcrumb>
+          <Breadcrumb.Item>
+            <Link to="/home">Home</Link>
+          </Breadcrumb.Item>
+          <Breadcrumb.Item>
+            <Link to="/users">Users</Link>
+          </Breadcrumb.Item>
+        </Breadcrumb>
         <h1>Calling to GitHub API</h1>
         <Form layout="inline" onSubmit={this.handleSubmit}>
           <Form.Item>
@@ -91,7 +101,10 @@ class Home extends Component {
           </Form.Item>
         </Form>
 
-        {isLoading ? <div><Spin /> <Ghost size={240} mood="blissful" color="#E0E4E8" /></div> : 
+        {
+          isLoading ? 
+          <div><Spin /> <Ghost size={240} mood="blissful" color="#E0E4E8" /></div>
+          :
           <List
             bordered
             dataSource={myRepos}

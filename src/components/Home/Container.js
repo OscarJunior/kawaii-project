@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axios from "axios";
 import { Switch } from "antd";
 import {
   Browser,
@@ -11,71 +12,125 @@ import {
 
 import "./container-style.css";
 
-const happyKawaisPosition = {
-  myKawaiiInLeft: [
-    isLeft => (
-      <Cat size={320} mood={isLeft ? "excited" : "sad"} color="#596881" />
-    ),
-    isLeft => (
-      <File size={200} mood={isLeft ? "excited" : "sad"} color="#83D1FB" />
-    ),
-    isLeft => (
-      <IceCream
-        size={300}
-        mood={isLeft ? "excited" : "sad"}
-        color="#FDA7DC"
-      />
-    ),
-    isLeft => (
-      <Planet
-        size={220}
-        mood={isLeft ? "excited" : "sad"}
-        color="#FCCB7E"
-      />
-    )
-  ],
-  myKawaiiInRight: [
-    isLeft => (
-      <Browser
-        size={200}
-        mood={isLeft ? "sad" : "excited"}
-        color="#61DDBC"
-      />
-    ),
-    isLeft => (
-      <CreditCard
-        size={200}
-        mood={isLeft ? "sad" : "excited"}
-        color="#83D1FB"
-      />
-    )
-  ]
-}
-
 class Container extends Component {
   constructor() {
     super();
 
-    this.state = happyKawaisPosition
+    this.state = {
+      myKawaiiInLeft: [
+        isLeft => (
+          <Cat id="1" size={320} mood={isLeft ? "excited" : "sad"} color="#596881" />
+        ),
+        isLeft => (
+          <File id="2" size={200} mood={isLeft ? "excited" : "sad"} color="#83D1FB" />
+        ),
+        isLeft => (
+          <IceCream
+            id="3"
+            size={300}
+            mood={isLeft ? "excited" : "sad"}
+            color="#FDA7DC"
+          />
+        ),
+        isLeft => (
+          <Planet
+            id="4"
+            size={220}
+            mood={isLeft ? "excited" : "sad"}
+            color="#FCCB7E"
+          />
+        )
+      ],
+      myKawaiiInRight: [
+        isLeft => (
+          <Browser
+            id="5"
+            size={200}
+            mood={isLeft ? "sad" : "excited"}
+            color="#61DDBC"
+          />
+        ),
+        isLeft => (
+          <CreditCard
+            id="6"
+            size={200}
+            mood={isLeft ? "sad" : "excited"}
+            color="#83D1FB"
+          />
+        )
+      ]
+    }
 
     this.handlerChange = this.handlerChange.bind(this);
   }
 
   handlerChange = (e) =>{
-    this.setState(happyKawaisPosition)
+    let happyOnLeft = [] , happyOnRight = []
+
+    for (const kawaii of this.state.myKawaiiInLeft) {
+      kawaii(true).props.mood === 'excited' ? happyOnLeft.push(kawaii) : happyOnRight.push(kawaii)
+    }
+    for (const kawaii of this.state.myKawaiiInRight) {
+      kawaii().props.mood === 'excited' ? happyOnRight.push(kawaii) : happyOnLeft.push(kawaii)
+    }
+
+    happyOnLeft.sort((a,b) => (a().props.id - b().props.id) )
+    happyOnRight.sort((a,b) => (a().props.id - b().props.id) )
+
+    this.setState({
+      myKawaiiInLeft : happyOnLeft,
+      myKawaiiInRight : happyOnRight
+    })
   }
 
   componentDidMount = () =>{
-    let storage = window.localStorage.getItem('myState')
-    if(storage) {
-      //console.log(storage)
-      //this.setState(JSON.parse(storage))
-    }
-     
+    let {userId, token} = JSON.parse(window.localStorage.getItem('userData'))
+    axios.get(`http://localhost:8080/v1/kawaii/${userId}`, { headers: {Authorization: token} })
+        .then( ({data}) => {
+          let {kawaiisInleft, kawaiisInRight} = data
+          
+          let wasOnLeft = [] , wasOnRight = []
+          
+          kawaiisInleft.forEach(value => { //Buscamos por id en los dos lados. Si se encuentra en uno no se busca en el otro
+            let kawaii = this.state.myKawaiiInLeft.find(kawaii => (kawaii().props.id === value))
+            kawaii ? wasOnLeft.push(kawaii) : wasOnLeft.push(this.state.myKawaiiInRight.find(kawaii => (kawaii().props.id === value)))
+          });
+
+          kawaiisInRight.forEach(value => { //Buscamos por id en los dos lados. Si se encuentra en uno no se busca en el otro
+            let kawaii = this.state.myKawaiiInLeft.find(kawaii => (kawaii().props.id === value))
+            kawaii ? wasOnRight.push(kawaii) : wasOnRight.push(this.state.myKawaiiInRight.find(kawaii => (kawaii().props.id === value)))
+          });
+
+          this.setState({
+            myKawaiiInLeft : wasOnLeft,
+            myKawaiiInRight : wasOnRight
+          })
+        })
+        .catch( err => {
+          console.log(err)
+        })
   }
 
   componentWillUnmount = () =>{
-    //window.localStorage.setItem('myState', JSON.stringify(this.state))
+    let leftIds = [], rightIds = []
+
+    for (const kawaii of this.state.myKawaiiInLeft) {
+      leftIds.push(kawaii().props.id)
+    }
+    for (const kawaii of this.state.myKawaiiInRight) {
+      rightIds.push(kawaii().props.id)
+    }
+
+    let data = {kawaiisInleft : leftIds, kawaiisInRight : rightIds}
+
+    let {userId, token} = JSON.parse(window.localStorage.getItem('userData'))
+    axios.put(`http://localhost:8080/v1/kawaii/${userId}`, data, { headers: { 'Accept' : "application/json", 'Content-type' : "application/json", 'Authorization' : token} })
+      .then(res => {
+        window.sessionStorage.setItem('myIds',JSON.stringify(data))
+      })
+      .catch(err =>{
+        console.log(err)
+      })
   }
 
   render() {
