@@ -17,17 +17,16 @@ class Login extends Component {
     e.preventDefault();
     this.props.form.validateFields((err, values) => {
       if (!err) {
-        const user = {
-          email: values.email,
-          password : values.password
-        };
-        console.log(user)
         axios.post(`http://localhost:8080/v1/login/`, { email: values.email, password : values.password })
           .then(res => {
             const {_id, access_token} = res.data
 
-            let userData = {userId: _id, token: access_token}
+            axios.get(`http://localhost:8080/v1/kawaii/${_id}`, { headers: {Authorization: access_token} })
+              .then( ({data}) => {
+                !data && axios.post("http://localhost:8080/v1/kawaii", { "userId" : _id, "kawaiisInleft" : [1,2,3,4], "kawaiisInRight" : [5,6] }, { headers: {Authorization: access_token} })
+              })
 
+            let userData = {userId: _id, token: access_token}
             window.localStorage.setItem('userData',JSON.stringify(userData))
             window.location.replace('/home')
           })
